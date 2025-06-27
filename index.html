@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Ponto - Quitanda D'Aldeia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos customizados para as cores e fontes */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e6ffe6; /* Verde claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative; /* Para posicionar o modal */
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4a2c2a; /* Marrom escuro para labels */
+        }
+        .input-group input[type="time"],
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #b3d9b3; /* Borda verde mais escura */
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #4a2c2a; /* Marrom escuro para texto */
+            box-sizing: border-box;
+            background-color: #f0fff0; /* Fundo levemente verde para inputs */
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #4CAF50; /* Verde vibrante */
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #45a049; /* Verde mais escuro no hover */
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #8B4513; /* Marrom médio */
+            color: #ffffff;
+        }
+        .btn-secondary:hover {
+            background-color: #6e360f; /* Marrom mais escuro no hover */
+            transform: translateY(-2px);
+        }
+        .message-box {
+            background-color: #d4edda; /* Verde claro para mensagens de sucesso */
+            color: #155724; /* Verde escuro para texto de sucesso */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box.error {
+            background-color: #f8d7da; /* Vermelho claro para erros */
+            color: #721c24; /* Vermelho escuro para texto de erro */
+        }
+        .loading-indicator {
+            display: none;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .loading-indicator.show {
+            display: block;
+        }
+        .footer {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
+
+        /* Estilos para o modal de perfil do usuário */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-radius: 1rem; /* Para combinar com o container */
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .modal-content h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #4a2c2a;
+        }
+
+        /* Estilos para o menu de navegação */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            gap: 0.5rem; /* Reduz o gap para caber mais botões */
+            flex-wrap: wrap; /* Permite que os botões quebrem linha */
+        }
+        .nav-buttons .btn {
+            flex-grow: 1;
+            min-width: 100px; /* Garante que os botões não fiquem muito pequenos */
+            padding: 0.6rem 1rem; /* Ajusta o padding */
+            font-size: 0.9rem; /* Ajusta o tamanho da fonte */
+        }
+
+        /* Estilos para a tabela de resumo semanal */
+        .weekly-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .weekly-summary-table th,
+        .weekly-summary-table td {
+            border: 1px solid #b3d9b3;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .weekly-summary-table th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: 600;
+        }
+        .weekly-summary-table tbody tr:nth-child(even) {
+            background-color: #f0fff0;
+        }
+        .weekly-summary-table tbody tr:hover {
+            background-color: #e6ffe6;
+        }
+        .total-balance {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4a2c2a;
+        }
+        .total-balance.positive {
+            color: #28a745; /* Verde para saldo positivo */
+        }
+        .total-balance.negative {
+            color: #dc3545; /* Vermelho para saldo negativo */
+        }
+
+        /* Estilos para a seção Sobre */
+        .about-section {
+            text-align: center;
+            padding: 1rem;
+            color: #4a2c2a; /* Dark brown text */
+        }
+        .about-section p {
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+        .about-section strong {
+                color: #4CAF50; /* Vibrant green for strong text */
+        }
+
+        /* Estilos para a seção de Histórico de 2 Semanas */
+        .history-list {
+            text-align: left;
+            margin-top: 1.5rem;
+        }
+        .history-day {
+            background-color: #f0fff0;
+            border: 1px solid #b3d9b3;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .history-day h3 {
+            font-weight: 700;
+            color: #4a2c2a;
+            margin-bottom: 0.5rem;
+        }
+        .history-day ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .history-day ul li {
+            margin-bottom: 0.25rem;
+            color: #6e360f;
+        }
+        .history-day ul li strong {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <button id="showPontoBtn" class="btn btn-primary">Registrar Ponto</button>
+            <button id="showSummaryBtn" class="btn btn-secondary">Resumo Semanal</button>
+            <button id="showHistoryBtn" class="btn btn-secondary">Histórico 2 Semanas</button>
+            <button id="showAboutBtn" class="btn btn-secondary">Sobre</button>
+        </div>
+
+        <div id="pontoView">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">Ponto Digital - Quitanda D'Aldeia</h1>
+
+            <div class="input-group">
+                <label for="entrada">Entrada:</label>
+                <input type="time" id="entrada">
+            </div>
+            <div class="input-group">
+                <label for="inicioIntervalo">Início Intervalo:</label>
+                <input type="time" id="inicioIntervalo">
+            </div>
+            <div class="input-group">
+                <label for="fimIntervalo">Fim Intervalo:</label>
+                <input type="time" id="fimIntervalo">
+            </div>
+            <div class="input-group">
+                <label for="saida">Saída:</label>
+                <input type="time" id="saida">
+            </div>
+
+            <div class="flex justify-center mt-6">
+                <button id="saveBtn" class="btn btn-primary">Salvar Ponto</button>
+                <button id="clearBtn" class="btn btn-secondary">Limpar</button>
+            </div>
+        </div>
+
+        <div id="summaryView" style="display: none;">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">Resumo Semanal - Quitanda D'Aldeia</h1>
+            <p class="text-gray-700 mb-4">Carga horária: Seg-Qui (7h), Sex-Sab (8h), Dom (Escala)</p>
+            <table class="weekly-summary-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horas Trab.</th>
+                        <th>Carga Diária</th>
+                        <th>Saldo Diário</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryTableBody">
+                    <!-- Dados do resumo serão inseridos aqui -->
+                </tbody>
+            </table>
+            <div id="totalBalance" class="total-balance"></div>
+        </div>
+
+        <div id="lastTwoWeeksView" style="display: none;">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">Histórico de Pontos (Últimas 2 Semanas)</h1>
+            <div id="historyList" class="history-list">
+                <!-- Histórico detalhado será inserido aqui -->
+            </div>
+        </div>
+
+        <div id="aboutView" style="display: none;">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">Sobre a Ferramenta</h1>
+            <div class="about-section">
+                <p>Esta ferramenta de registro de ponto foi desenvolvida para a <strong>Quitanda D'Aldeia Filial "Cordeiro"</strong>.</p>
+                <p>Criador: <strong>Marcos Henrique de Albuquerque Freitas</strong></p>
+                <p>Versão: <strong>1.0</strong></p>
+                <p>Ano de Lançamento: <strong>2025</strong></p>
+                <p>&copy; 2025 Todos os direitos reservados à ferramenta.</p>
+            </div>
+        </div>
+
+        <div id="messageBox" class="message-box"></div>
+        <div id="loadingIndicator" class="loading-indicator">Carregando/Salvando...</div>
+
+        <div class="footer">
+            <p>ID do Usuário: <span id="userIdDisplay">Carregando...</span></p>
+            <p>Nome: <span id="userNameDisplay">N/A</span> | Setor: <span id="userSectorDisplay">N/A</span></p>
+        </div>
+
+        <!-- Modal de Perfil do Usuário -->
+        <div id="profileModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2>Bem-vindo!</h2>
+                <p class="mb-4 text-gray-700">Parece que é sua primeira vez aqui. Por favor, insira seu nome e setor para começar.</p>
+                <div class="input-group">
+                    <label for="profileName">Nome:</label>
+                    <input type="text" id="profileName" placeholder="Seu nome">
+                </div>
+                <div class="input-group">
+                    <label for="profileSector">Setor:</label>
+                    <input type="text" id="profileSector" placeholder="Seu setor">
+                </div>
+                <button id="saveProfileBtn" class="btn btn-primary w-full">Salvar e Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Registra o Service Worker para capacidades offline
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Falha no registro do Service Worker:', error);
+                    });
+            });
+        }
+
+        // Importa as funções necessárias do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variáveis globais para Firebase (serão preenchidas pelo ambiente Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Habilita a persistência offline do Firestore
+        // Isso permite que os dados sejam armazenados em cache localmente e sincronizados
+        // quando a conexão for restabelecida.
+        enableIndexedDbPersistence(db)
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.warn('Persistência offline desabilitada: Múltiplas abas abertas ou navegador não suporta.');
+                } else if (err.code == 'unimplemented') {
+                    console.warn('Persistência offline não suportada neste navegador.');
+                }
+            });
+
+        let userId = null; // Variável para armazenar o ID do usuário
+        let userProfile = null; // Variável para armazenar o perfil do usuário
+
+        // Elementos do DOM
+        const entradaInput = document.getElementById('entrada');
+        const inicioIntervaloInput = document.getElementById('inicioIntervalo');
+        const fimIntervaloInput = document.getElementById('fimIntervalo');
+        const saidaInput = document.getElementById('saida');
+        const saveBtn = document.getElementById('saveBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const messageBox = document.getElementById('messageBox');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const userSectorDisplay = document.getElementById('userSectorDisplay');
+
+        // Elementos do modal de perfil
+        const profileModal = document.getElementById('profileModal');
+        const profileNameInput = document.getElementById('profileName');
+        const profileSectorInput = document.getElementById('profileSector');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+        // Elementos de navegação e visualizações
+        const showPontoBtn = document.getElementById('showPontoBtn');
+        const showSummaryBtn = document.getElementById('showSummaryBtn');
+        const showHistoryBtn = document.getElementById('showHistoryBtn');
+        const showAboutBtn = document.getElementById('showAboutBtn');
+        const pontoView = document.getElementById('pontoView');
+        const summaryView = document.getElementById('summaryView');
+        const lastTwoWeeksView = document.getElementById('lastTwoWeeksView');
+        const aboutView = document.getElementById('aboutView');
+        const summaryTableBody = document.getElementById('summaryTableBody');
+        const totalBalanceDiv = document.getElementById('totalBalance');
+        const historyList = document.getElementById('historyList');
+
+        // Define a carga horária diária esperada em horas, por dia da semana (0=Dom, 1=Seg...)
+        const EXPECTED_DAILY_WORKLOAD_HOURS = {
+            0: 0, // Domingo: 0 horas para saldo (dia de escala, DSR)
+            1: 7, // Segunda: 7 horas (com 2h de intervalo)
+            2: 7, // Terça: 7 horas (com 2h de intervalo)
+            3: 7, // Quarta: 7 horas (com 2h de intervalo)
+            4: 7, // Quinta: 7 horas (com 2h de intervalo)
+            5: 8, // Sexta: 8 horas (com 2h de intervalo)
+            6: 8  // Sábado: 8 horas (com 2h de intervalo)
+        };
+
+        const DAYS_OF_WEEK_PT = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+
+        // Função para exibir mensagens ao usuário
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show';
+            if (type === 'error') {
+                messageBox.classList.add('error');
+            } else {
+                messageBox.classList.remove('error');
+            }
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 5000); // Esconde a mensagem após 5 segundos
+        }
+
+        // Função para mostrar/esconder o indicador de carregamento
+        function toggleLoading(show) {
+            if (show) {
+                loadingIndicator.classList.add('show');
+            } else {
+                loadingIndicator.classList.remove('show');
+            }
+        }
+
+        // Função para obter a data no formato YYYY-MM-DD
+        function getCurrentDate(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Função para converter "HH:MM" em minutos desde a meia-noite
+        function timeToMinutes(timeStr) {
+            if (!timeStr) return 0; // Se vazio, considera 0 minutos
+            const parts = timeStr.split(':');
+            const hours = parseInt(parts[0], 10);
+            const minutes = parseInt(parts[1], 10);
+            return hours * 60 + minutes;
+        }
+
+        // Função para converter minutos em formato "HHh MMm"
+        function formatMinutesToHoursMinutes(totalMinutes) {
+            if (isNaN(totalMinutes)) return "N/A";
+            const sign = totalMinutes < 0 ? "-" : "";
+            const absMinutes = Math.abs(totalMinutes);
+            const hours = Math.floor(absMinutes / 60);
+            const minutes = absMinutes % 60;
+            return `${sign}${hours}h ${minutes}m`;
+        }
+
+        // Função para calcular horas trabalhadas em um dia
+        function calculateDailyHours(entrada, inicioIntervalo, fimIntervalo, saida) {
+            const entradaMin = timeToMinutes(entrada);
+            const inicioIntervaloMin = timeToMinutes(inicioIntervalo);
+            const fimIntervaloMin = timeToMinutes(fimIntervalo);
+            const saidaMin = timeToMinutes(saida);
+
+            if (entradaMin === 0 || saidaMin === 0) return 0; // Não é possível calcular sem entrada e saída
+
+            let workedMinutes = saidaMin - entradaMin;
+            if (inicioIntervaloMin > 0 && fimIntervaloMin > 0) {
+                const intervalDuration = fimIntervaloMin - inicioIntervaloMin;
+                if (intervalDuration > 0) {
+                    workedMinutes -= intervalDuration;
+                }
+            }
+            return workedMinutes / 60; // Retorna em horas
+        }
+
+        // Função para carregar o perfil do usuário
+        async function loadUserProfile() {
+            if (!userId) {
+                console.log("Usuário não autenticado, não é possível carregar perfil.");
+                return null;
+            }
+            toggleLoading(true);
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/user_profile`, 'profile');
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    userProfile = docSnap.data();
+                    userNameDisplay.textContent = userProfile.name || 'N/A';
+                    userSectorDisplay.textContent = userProfile.sector || 'N/A';
+                    console.log("Perfil do usuário carregado:", userProfile);
+                    return userProfile;
+                } else {
+                    console.log("Perfil do usuário não encontrado.");
+                    return null;
+                }
+            } catch (e) {
+                console.error("Erro ao carregar perfil do usuário: ", e);
+                showMessage('Erro ao carregar perfil do usuário.', 'error');
+                return null;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Função para salvar o perfil do usuário
+        async function saveUserProfile(name, sector) {
+            if (!userId) {
+                showMessage('Erro: Usuário não autenticado. Não é possível salvar o perfil.', 'error');
+                return false;
+            }
+            toggleLoading(true);
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/user_profile`, 'profile');
+                await setDoc(docRef, { name, sector, timestamp: new Date() }, { merge: true });
+                userProfile = { name, sector };
+                userNameDisplay.textContent = name;
+                userSectorDisplay.textContent = sector;
+                showMessage('Perfil salvo com sucesso!', 'info');
+                return true;
+            } catch (e) {
+                console.error("Erro ao salvar perfil do usuário: ", e);
+                showMessage('Erro ao salvar perfil do usuário.', 'error');
+                return false;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Função para carregar os dados do ponto para o dia atual
+        async function loadPontoData() {
+            if (!userId) {
+                console.log("Usuário não autenticado, não é possível carregar dados.");
+                return;
+            }
+            toggleLoading(true);
+            try {
+                const date = getCurrentDate();
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/work_times`, date);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    entradaInput.value = data.entrada || '';
+                    inicioIntervaloInput.value = data.inicioIntervalo || '';
+                    fimIntervaloInput.value = data.fimIntervalo || '';
+                    saidaInput.value = data.saida || '';
+                    showMessage('Dados do ponto carregados com sucesso!', 'info');
+                } else {
+                    showMessage('Nenhum dado de ponto encontrado para hoje.', 'info');
+                    clearInputs(); // Limpa os campos se não houver dados
+                }
+            } catch (e) {
+                console.error("Erro ao carregar dados do ponto: ", e);
+                showMessage('Erro ao carregar dados do ponto.', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Função para salvar os dados do ponto
+        async function savePontoData() {
+            if (!userId) {
+                showMessage('Erro: Usuário não autenticado. Não é possível salvar.', 'error');
+                return;
+            }
+            toggleLoading(true);
+            try {
+                const date = getCurrentDate();
+                const pontoData = {
+                    entrada: entradaInput.value,
+                    inicioIntervalo: inicioIntervaloInput.value,
+                    fimIntervalo: fimIntervaloInput.value,
+                    saida: saidaInput.value,
+                    timestamp: new Date() // Adiciona um timestamp de atualização
+                };
+
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/work_times`, date);
+                await setDoc(docRef, pontoData, { merge: true }); // Usa merge para atualizar campos existentes sem sobrescrever tudo
+                showMessage('Ponto salvo com sucesso!', 'info');
+            } catch (e) {
+                console.error("Erro ao salvar dados do ponto: ", e);
+                showMessage('Erro ao salvar dados do ponto.', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Função para limpar os campos de input
+        function clearInputs() {
+            entradaInput.value = '';
+            inicioIntervaloInput.value = '';
+            fimIntervaloInput.value = '';
+            saidaInput.value = '';
+        }
+
+        // Função para carregar e exibir o resumo semanal
+        async function loadWeeklySummary() {
+            if (!userId) {
+                showMessage('Erro: Usuário não autenticado. Não é possível carregar o resumo.', 'error');
+                return;
+            }
+            toggleLoading(true);
+            summaryTableBody.innerHTML = ''; // Limpa a tabela
+            totalBalanceDiv.textContent = ''; // Limpa o saldo total
+
+            try {
+                const today = new Date();
+                const startOfWeek = new Date(today);
+                // Ajusta para o início da semana (Segunda-feira). Se for domingo (0), volta 6 dias. Senão, volta (dia da semana - 1) dias.
+                startOfWeek.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+                startOfWeek.setHours(0, 0, 0, 0); // Zera hora para comparação de data
+
+                const dailyData = [];
+                let totalBalanceMinutes = 0;
+
+                for (let i = 0; i < 7; i++) { // Iterar pelos últimos 7 dias
+                    const currentDate = new Date(startOfWeek);
+                    currentDate.setDate(startOfWeek.getDate() + i);
+                    const dateStr = getCurrentDate(currentDate);
+                    const dayOfWeek = currentDate.getDay(); // 0 for Sunday, 1 for Monday, etc.
+
+                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/work_times`, dateStr);
+                    const docSnap = await getDoc(docRef);
+
+                    let workedHours = 0;
+                    let dailyExpectedHours = EXPECTED_DAILY_WORKLOAD_HOURS[dayOfWeek];
+                    let dailyBalance = 0;
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        workedHours = calculateDailyHours(data.entrada, data.inicioIntervalo, data.fimIntervalo, data.saida);
+                        // Apenas calcula o saldo se for um dia de trabalho regular (Mon-Sat)
+                        if (dayOfWeek !== 0) { // Se não for domingo
+                            dailyBalance = workedHours - dailyExpectedHours;
+                            totalBalanceMinutes += dailyBalance * 60;
+                        } else {
+                            // Domingo: as horas trabalhadas são contadas, mas o saldo diário é 0
+                            // pois não contribui para o cálculo das 44h semanais e é um DSR.
+                            dailyBalance = 0;
+                        }
+                    }
+
+                    dailyData.push({
+                        date: dateStr,
+                        dayName: DAYS_OF_WEEK_PT[dayOfWeek],
+                        workedHours: workedHours,
+                        dailyExpectedHours: dailyExpectedHours,
+                        dailyBalance: dailyBalance
+                    });
+                }
+
+                // Ordenar os dados por data (do mais antigo para o mais recente)
+                dailyData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                dailyData.forEach(data => {
+                    const row = summaryTableBody.insertRow();
+                    const dateCell = row.insertCell();
+                    const workedHoursCell = row.insertCell();
+                    const expectedHoursCell = row.insertCell(); // Nova coluna para carga diária
+                    const dailyBalanceCell = row.insertCell();
+
+                    // Formato DD-MM
+                    const dateParts = data.date.split('-');
+                    dateCell.textContent = `${data.dayName}, ${dateParts[2]}-${dateParts[1]}`; // Ex: Segunda-feira, 26-06
+
+                    workedHoursCell.textContent = formatMinutesToHoursMinutes(data.workedHours * 60);
+                    expectedHoursCell.textContent = data.dailyExpectedHours > 0 ? formatMinutesToHoursMinutes(data.dailyExpectedHours * 60) : 'N/A'; // Exibe N/A para domingo
+                    const balanceText = formatMinutesToHoursMinutes(data.dailyBalance * 60);
+                    dailyBalanceCell.textContent = balanceText;
+                    dailyBalanceCell.classList.add(data.dailyBalance >= 0 ? 'text-green-600' : 'text-red-600');
+                });
+
+                const finalBalanceText = formatMinutesToHoursMinutes(totalBalanceMinutes);
+                totalBalanceDiv.textContent = `Saldo Total Semanal (Seg-Sab): ${finalBalanceText}`;
+                totalBalanceDiv.classList.remove('positive', 'negative');
+                totalBalanceDiv.classList.add(totalBalanceMinutes >= 0 ? 'positive' : 'negative');
+
+                showMessage('Resumo semanal carregado com sucesso!', 'info');
+            } catch (e) {
+                console.error("Erro ao carregar resumo semanal: ", e);
+                showMessage('Erro ao carregar resumo semanal.', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Função para carregar e exibir o histórico das últimas 2 semanas
+        async function loadLastTwoWeeksHistory() {
+            if (!userId) {
+                showMessage('Erro: Usuário não autenticado. Não é possível carregar o histórico.', 'error');
+                return;
+            }
+            toggleLoading(true);
+            historyList.innerHTML = ''; // Limpa a lista
+
+            try {
+                const today = new Date();
+                const fourteenDaysAgo = new Date(today);
+                fourteenDaysAgo.setDate(today.getDate() - 13); // Últimos 14 dias (incluindo hoje)
+
+                const datesToFetch = [];
+                for (let i = 0; i < 14; i++) {
+                    const d = new Date(fourteenDaysAgo);
+                    d.setDate(fourteenDaysAgo.getDate() + i);
+                    datesToFetch.push(d);
+                }
+
+                const workTimesCollection = collection(db, `artifacts/${appId}/users/${userId}/work_times`);
+
+                const historyData = [];
+                for (const dateObj of datesToFetch) {
+                    const dateStr = getCurrentDate(dateObj);
+                    const dayOfWeek = dateObj.getDay();
+                    const docRef = doc(workTimesCollection, dateStr);
+                    const docSnap = await getDoc(docRef);
+
+                    let pontoDetails = "Nenhum ponto registrado.";
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        pontoDetails = `Entrada: ${data.entrada || 'N/A'}, Início Intervalo: ${data.inicioIntervalo || 'N/A'}, Fim Intervalo: ${data.fimIntervalo || 'N/A'}, Saída: ${data.saida || 'N/A'}`;
+                    }
+
+                    historyData.push({
+                        date: dateStr,
+                        dayName: DAYS_OF_WEEK_PT[dayOfWeek],
+                        details: pontoDetails
+                    });
+                }
+
+                // Ordenar os dados por data (do mais recente para o mais antigo)
+                historyData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                historyData.forEach(data => {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.classList.add('history-day');
+                    
+                    const dateHeading = document.createElement('h3');
+                    // Formato DD-MM
+                    const dateParts = data.date.split('-');
+                    dateHeading.textContent = `${data.dayName}, ${dateParts[2]}-${dateParts[1]}`; // Ex: Segunda-feira, 26-06
+                    dayDiv.appendChild(dateHeading);
+
+                    const detailsList = document.createElement('ul');
+                    const listItem = document.createElement('li');
+                    listItem.textContent = data.details;
+                    detailsList.appendChild(listItem);
+                    dayDiv.appendChild(detailsList);
+
+                    historyList.appendChild(dayDiv);
+                });
+
+                showMessage('Histórico carregado com sucesso!', 'info');
+            } catch (e) {
+                console.error("Erro ao carregar histórico: ", e);
+                showMessage('Erro ao carregar histórico.', 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+
+        // Função para alternar entre as views
+        function showView(viewId) {
+            pontoView.style.display = 'none';
+            summaryView.style.display = 'none';
+            lastTwoWeeksView.style.display = 'none';
+            aboutView.style.display = 'none';
+
+            // Resetar estilos dos botões
+            showPontoBtn.classList.remove('btn-primary');
+            showPontoBtn.classList.add('btn-secondary');
+            showSummaryBtn.classList.remove('btn-primary');
+            showSummaryBtn.classList.add('btn-secondary');
+            showHistoryBtn.classList.remove('btn-primary');
+            showHistoryBtn.classList.add('btn-secondary');
+            showAboutBtn.classList.remove('btn-primary');
+            showAboutBtn.classList.add('btn-secondary');
+
+            // Mostrar a view selecionada e destacar seu botão
+            if (viewId === 'pontoView') {
+                pontoView.style.display = 'block';
+                showPontoBtn.classList.remove('btn-secondary');
+                showPontoBtn.classList.add('btn-primary');
+                loadPontoData(); // Recarrega os dados do ponto ao voltar para esta view
+            } else if (viewId === 'summaryView') {
+                summaryView.style.display = 'block';
+                showSummaryBtn.classList.remove('btn-secondary');
+                showSummaryBtn.classList.add('btn-primary');
+                loadWeeklySummary(); // Carrega o resumo ao mudar para esta view
+            } else if (viewId === 'lastTwoWeeksView') {
+                lastTwoWeeksView.style.display = 'block';
+                showHistoryBtn.classList.remove('btn-secondary');
+                showHistoryBtn.classList.add('btn-primary');
+                loadLastTwoWeeksHistory(); // Carrega o histórico ao mudar para esta view
+            } else if (viewId === 'aboutView') {
+                aboutView.style.display = 'block';
+                showAboutBtn.classList.remove('btn-secondary');
+                showAboutBtn.classList.add('btn-primary');
+            }
+        }
+
+        // Event Listeners
+        saveBtn.addEventListener('click', savePontoData);
+        clearBtn.addEventListener('click', clearInputs);
+        saveProfileBtn.addEventListener('click', async () => {
+            const name = profileNameInput.value.trim();
+            const sector = profileSectorInput.value.trim();
+
+            if (name && sector) {
+                const saved = await saveUserProfile(name, sector);
+                if (saved) {
+                    profileModal.classList.add('hidden');
+                    // Agora que o perfil está salvo, podemos carregar os dados do ponto
+                    showView('pontoView'); // Exibe a view de registro de ponto
+                }
+            } else {
+                showMessage('Por favor, preencha seu nome e setor.', 'error');
+            }
+        });
+
+        // Event listeners para botões de navegação
+        showPontoBtn.addEventListener('click', () => showView('pontoView'));
+        showSummaryBtn.addEventListener('click', () => showView('summaryView'));
+        showHistoryBtn.addEventListener('click', () => showView('lastTwoWeeksView'));
+        showAboutBtn.addEventListener('click', () => showView('aboutView'));
+
+        // Autenticação e carregamento inicial
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = userId;
+                console.log("Usuário autenticado:", userId);
+
+                // Tenta carregar o perfil do usuário
+                const profile = await loadUserProfile();
+
+                if (!profile) {
+                    // Se não houver perfil, mostra o modal
+                    profileModal.classList.remove('hidden');
+                } else {
+                    // Se houver perfil, esconde o modal e exibe a view de registro de ponto
+                    profileModal.classList.add('hidden');
+                    showView('pontoView');
+                }
+            } else {
+                // User is not signed in. Try to authenticate.
+                let authAttempted = false;
+
+                // 1. Try custom token if available (from Canvas environment)
+                if (initialAuthToken && typeof initialAuthToken === 'string' && initialAuthToken.length > 0) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Autenticação com token personalizado bem-sucedida.");
+                        authAttempted = true; // Mark as successfully authenticated
+                    } catch (error) {
+                        console.error("Erro ao autenticar com token personalizado:", error);
+                        showMessage('Erro na autenticação com token personalizado. Tentando autenticação anônima.', 'error');
+                        // Do not mark authAttempted as true, proceed to anonymous
+                    }
+                }
+
+                // 2. If not authenticated yet (either no custom token or custom token failed), try anonymous
+                if (!authAttempted) {
+                    try {
+                        await signInAnonymously(auth);
+                        console.log("Autenticação anônima bem-sucedida.");
+                    } catch (error) {
+                        console.error("Erro na autenticação anônima:", error);
+                        showMessage('Erro crítico de autenticação. O aplicativo pode não funcionar corretamente.', 'error');
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
