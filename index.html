@@ -349,28 +349,21 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Variáveis globais para Firebase (serão preenchidas pelo ambiente Canvas)
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        // Seus dados de configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAC8vjf_8KnEZYFp0XG2cZQU31iJQhqhuo",
+            authDomain: "meuponto-dd759.firebaseapp.com",
+            projectId: "meuponto-dd759",
+            storageBucket: "meuponto-dd759.firebasestorage.app",
+            messagingSenderId: "362818653256",
+            appId: "1:362818653256:web:c92b7ceefab233490d5c7d",
+            measurementId: "G-3VLTBV78M8"
+        };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAC8vjf_8KnEZYFp0XG2cZQU31iJQhqhuo",
-  authDomain: "meuponto-dd759.firebaseapp.com",
-  projectId: "meuponto-dd759",
-  storageBucket: "meuponto-dd759.firebasestorage.app",
-  messagingSenderId: "362818653256",
-  appId: "1:362818653256:web:c92b7ceefab233490d5c7d",
-  measurementId: "G-3VLTBV78M8"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+        // Para hospedagem externa, o appId para a estrutura de dados será o projectId
+        const appId = firebaseConfig.projectId;
+        // Não usaremos o token personalizado injetado do ambiente Canvas em hospedagem externa
+        const initialAuthToken = null;
 
         // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
@@ -378,8 +371,6 @@ const analytics = getAnalytics(app);
         const auth = getAuth(app);
 
         // Habilita a persistência offline do Firestore
-        // Isso permite que os dados sejam armazenados em cache localmente e sincronizados
-        // quando a conexão for restabelecida.
         enableIndexedDbPersistence(db)
             .catch((err) => {
                 if (err.code == 'failed-precondition') {
